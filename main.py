@@ -3,38 +3,35 @@ import sys
 from player import Player
 from camera import Camera
 from bullet import Bullet
+from map import MAP_LAYOUT, TILE_SIZE
 
 pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 BACKGROUND_COLOR =(30,30,30)
 GRID_COLOR = (60,60,60)
-GRID_SQUARE_SIZE = 50
 FPS = 60
-MAP_WIDTH = 2000
-MAP_HEIGHT = 1500
+
+from map import MAP_WIDTH, MAP_HEIGHT
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Smokin' Guns")
 clock = pygame.time.Clock()
 
-player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+walls = []
+for row_index, row in enumerate(MAP_LAYOUT):
+    for col_index, tile in enumerate(row):
+        if tile == '#':
+            x = col_index * TILE_SIZE
+            y = row_index * TILE_SIZE
+            walls.append(pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))
+
+player = Player(TILE_SIZE * 5, TILE_SIZE * 5)
 camera = Camera(MAP_WIDTH, MAP_HEIGHT)
 bullets = []
-walls = [
-    pygame.Rect(400, 300, 200, 50),
-    pygame.Rect(700, 500, 50, 400),
-    pygame.Rect(1000, 200, 400, 50)
-]
-
-def draw_grid(surface):
-    for x in range(0, MAP_WIDTH, GRID_SQUARE_SIZE):
-        pygame.draw.line(surface, GRID_COLOR, (x, 0), (x, MAP_HEIGHT))
-    for y in range(0, MAP_HEIGHT, GRID_SQUARE_SIZE):
-        pygame.draw.line(surface, GRID_COLOR, (0, y), (MAP_WIDTH, y))
 
 map_surface = pygame.Surface((MAP_WIDTH, MAP_HEIGHT))
 map_surface.fill(BACKGROUND_COLOR)
-draw_grid(map_surface)
 map_rect = map_surface.get_rect()
 
 running = True
