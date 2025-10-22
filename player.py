@@ -2,37 +2,35 @@
 
 import pygame
 import math
-from bullet import Bullet
+from gun import Gun
 
 class Player:
     def __init__(self, x, y):
         self.pos = pygame.math.Vector2(x, y)
         self.width = 40
         self.height = 30
-        
         self.original_image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         pygame.draw.rect(self.original_image, (0, 160, 255), (0, 0, self.width, self.height))
         pygame.draw.line(self.original_image, (255, 255, 255), (self.width / 2, self.height / 2), (self.width / 2, 0), 3)
         self.image = self.original_image
         self.rect = self.image.get_rect(center = (x, y))
-
         self.hitbox = pygame.Rect(0, 0, self.width, self.height)
         self.hitbox.center = self.pos
-
         self.angle = 0
         self.rotation_speed = 3
         self.move_speed = 3
         self.backward_move_speed = 1.5
-        self.shoot_cooldown = 200
-        self.last_shot_time = 0
         self.is_shooting = False
+        self.gun = Gun(name="Pistol",
+                        cooldown = 200,
+                        bullet_speed = 8,
+                        bullet_lifetime = 1000,
+                        bullet_size = (4, 10),
+                        bullet_color = (255,255,0))
+        self.health = 100
 
     def shoot(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_shot_time > self.shoot_cooldown:
-            self.last_shot_time = current_time
-            return Bullet(self.pos.x, self.pos.y, self.angle)
-        return None
+        return self.gun.shoot(self.pos.x, self.pos.y, self.angle)
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -41,7 +39,6 @@ class Player:
             self.angle += self.rotation_speed
         if keys[pygame.K_RIGHT]:
             self.angle -= self.rotation_speed
-        
         if keys[pygame.K_SPACE]:
             self.is_shooting = True
         else:
@@ -49,11 +46,9 @@ class Player:
 
     def update(self, walls):
         self.handle_input()
-
         rads = math.radians(self.angle)
         vel_x = 0
         vel_y = 0
-
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
             vel_x -= math.sin(rads) * self.move_speed
