@@ -9,10 +9,9 @@ class Gun:
         self.bullet_lifetime = bullet_lifetime
         self.bullet_size = bullet_size
         self.bullet_color = bullet_color
-
         self.last_shot_time = 0
 
-    def shoot(self, x, y, angle):
+    def shoot(self, x, y, angle, owner):
         current_time = pygame.time.get_ticks()
         if current_time - self.last_shot_time > self.cooldown:
             self.last_shot_time = current_time
@@ -21,5 +20,6 @@ class Gun:
                         self.bullet_speed,
                         self.bullet_lifetime,
                         self.bullet_size,
-                        self.bullet_color)
+                        self.bullet_color,
+                        owner)
         return None

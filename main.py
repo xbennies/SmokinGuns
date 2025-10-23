@@ -3,7 +3,7 @@ import sys
 from player import Player
 from camera import Camera
 from map import MAP_LAYOUT, TILE_SIZE, MAP_WIDTH, MAP_HEIGHT
-from enemy import Enemy
+from ai_character import AICharacter
 
 pygame.init()
 SCREEN_WIDTH = 800
@@ -34,24 +34,30 @@ for row_index, row in enumerate(MAP_LAYOUT):
             x = col_index * TILE_SIZE
             y = row_index * TILE_SIZE
             walls.append(pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))
+
 player_spawn = (0,0)
-enemies = []
+police_team = []
+criminals_team = []
 
 for row_index, row in enumerate(MAP_LAYOUT):
-    for col_index, tile in enumerate(row):
+    for col_index, tile_char in enumerate(row):
         x = col_index * TILE_SIZE
         y = row_index * TILE_SIZE
 
         floor_tiles.append(pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))
 
-        if tile == '#':
+        if tile_char == '#':
             walls.append(pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))
-        if tile == 'P':
-            player_spawn = (x + TILE_SIZE / 2, y + TILE_SIZE / 2)
-        if tile == 'E':
-            enemies.append(Enemy(x + TILE_SIZE / 2, y + TILE_SIZE / 2))
+        elif tile_char == 'P':
+            player = Player(x + TILE_SIZE / 2, y + TILE_SIZE / 2)
+            police_team.append(player)
+        elif tile_char == 'T':
+            teammate = AICharacter(x + TILE_SIZE / 2, y + TILE_SIZE / 2, team='police')
+            police_team.append(teammate)
+        if tile_char == 'E':
+            enemy = AICharacter(x + TILE_SIZE / 2, y + TILE_SIZE / 2, team='criminals')
+            criminals_team.append(enemy)
 
-player = Player(player_spawn[0], player_spawn[1])
 camera = Camera(MAP_WIDTH, MAP_HEIGHT)
 bullets = []
 
@@ -68,11 +74,17 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
 
-    player.update(walls)
-    camera.update(player)
+    all_entities = police_team + criminals_team
 
-    for enemy in enemies:
-        enemy.update(player, walls)
+    player.update(walls)
+
+    for character in all_entities:
+        if isinstance(character, AICharacter):
+            fired_bullets = character.update(all_entities, walls)
+            if fired_bullets:
+                bullets.extend(fired_bullets)
+
+    camera.update(player)
 
     if player.is_shooting:
         new_bullet = player.shoot()
@@ -91,30 +103,33 @@ while running:
 
     for i in range(len(bullets) - 1, -1, -1):
         bullet = bullets[i]
-        for j in range(len(enemies) - 1, -1, -1):
-            enemy = enemies[j]
-            if bullet.rect.colliderect(enemy.hitbox):
-                enemy.health -= 25
+        bullet_removed = False
+        for entity in all_entities:
+            if bullet.rect.colliderect(entity.hitbox) and bullet.owner.team != entity.team:
+                entity.health -= 25
                 bullets.pop(i)
+                bullet_removed = True
                 break
+        if bullet_removed: continue
 
     bullets = [bullet for bullet in bullets if not bullet.is_dead()]
-    enemies = [enemy for enemy in enemies if not enemy.is_dead()]
+    police_team = [member for member in police_team if not member.is_dead()]
+    criminals_team = [member for member in criminals_team if not member.is_dead()]
+
+    if player not in police_team:
+        print("Player has been eliminated!")
+        running = False
 
     screen.fill(BACKGROUND_COLOR)
-
     for tile_rect in floor_tiles:
         screen.blit(floor_texture, camera.apply(tile_rect))
     for wall_rect in walls:
         screen.blit(wall_texture, camera.apply(wall_rect))
 
-    for enemy in enemies:
-        screen.blit(enemy.image, camera.apply(enemy.rect))
+    for character in all_entities:
+        screen.blit(character.image, camera.apply(character.rect))
 
-    screen.blit(player.image, camera.apply(player.rect))
-
-    for bullet in bullets:
-        screen.blit(bullet.image, camera.apply(bullet.rect))
+    for bullet in bullets: screen.blit(bullet.image, camera.apply(bullet.rect))
 
     pygame.display.flip()
     clock.tick(FPS)

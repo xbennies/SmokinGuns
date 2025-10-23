@@ -2,19 +2,17 @@ import pygame
 import math
 
 class Bullet:
-    def __init__(self, x, y, angle, speed, lifetime, size, color):
+    def __init__(self, x, y, angle, speed, lifetime, size, color, owner):
         self.pos = pygame.math.Vector2(x, y)
         self.angle = angle
         self.speed = speed
-
         self.image = pygame.Surface(size, pygame.SRCALPHA)
         self.image.fill(color)
-
         self.image = pygame.transform.rotate(self.image, self.angle)
         self.rect = self.image.get_rect(center = self.pos)
-
         self.lifetime = lifetime
         self.spawn_time = pygame.time.get_ticks()
+        self.owner = owner
 
     def update(self):
         rads = math.radians(self.angle)

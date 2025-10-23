@@ -3,6 +3,7 @@
 import pygame
 import math
 from gun import Gun
+from weapons import PISTOL, SHOTGUN, RIFLE
 
 class Player:
     def __init__(self, x, y):
@@ -28,9 +29,19 @@ class Player:
                         bullet_size = (4, 10),
                         bullet_color = (255,255,0))
         self.health = 100
+        self.team = 'police'
+
+        self.weapons = [PISTOL, SHOTGUN, RIFLE]
+        self.current_weapon_index = 0
+        self.gun = self.weapons[self.current_weapon_index]
+
+        self.is_shooting = False
+
+    def is_dead(self):
+        return self.health <= 0
 
     def shoot(self):
-        return self.gun.shoot(self.pos.x, self.pos.y, self.angle)
+        return self.gun.shoot(self.pos.x, self.pos.y, self.angle, self)
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -43,6 +54,19 @@ class Player:
             self.is_shooting = True
         else:
             self.is_shooting = False
+
+        if keys[pygame.K_1]:
+            self.current_weapon_index = 0
+            self.gun = self.weapons[self.current_weapon_index]
+            print(f"Switched to {self.gun.name}")
+        if keys[pygame.K_2]:
+            self.current_weapon_index = 1
+            self.gun = self.weapons[self.current_weapon_index]
+            print(f"Switched to {self.gun.name}")
+        if keys[pygame.K_3]:
+            self.current_weapon_index = 2
+            self.gun = self.weapons[self.current_weapon_index]
+            print(f"Switched to {self.gun.name}")
 
     def update(self, walls):
         self.handle_input()
