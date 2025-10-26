@@ -10,7 +10,7 @@ pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Top-Down Shooter")
+pygame.display.set_caption("Smokin' Guns")
 clock = pygame.time.Clock()
 FPS = 60
 
@@ -23,6 +23,8 @@ BUTTON_FONT = pygame.font.SysFont('Arial', 30)
 try:
     wall_texture = pygame.image.load("assets/wall.png").convert()
     floor_texture = pygame.image.load("assets/floor.png").convert()
+    police_texture = pygame.image.load("assets/police.png").convert_alpha()
+    criminal_texture = pygame.image.load("assets/criminal.png").convert_alpha()
     wall_texture = pygame.transform.scale(wall_texture, (TILE_SIZE, TILE_SIZE))
     floor_texture = pygame.transform.scale(floor_texture, (TILE_SIZE, TILE_SIZE))
 except pygame.error as e:
@@ -87,10 +89,10 @@ def game_loop():
             floor_tiles.append(pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))
             if tile_char == '#': walls.append(pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))
             elif tile_char == 'P':
-                player = Player(x + TILE_SIZE / 2, y + TILE_SIZE / 2)
+                player = Player(x + TILE_SIZE / 2, y + TILE_SIZE / 2, police_texture)
                 police_team.append(player)
-            elif tile_char == 'T': police_team.append(AICharacter(x + TILE_SIZE / 2, y + TILE_SIZE / 2, 'police'))
-            elif tile_char == 'E': criminals_team.append(AICharacter(x + TILE_SIZE / 2, y + TILE_SIZE / 2, 'criminals'))
+            elif tile_char == 'T': police_team.append(AICharacter(x + TILE_SIZE / 2, y + TILE_SIZE / 2, 'police', police_texture))
+            elif tile_char == 'E': criminals_team.append(AICharacter(x + TILE_SIZE / 2, y + TILE_SIZE / 2, 'criminals', criminal_texture))
 
     camera = Camera(MAP_WIDTH, MAP_HEIGHT)
     bullets = []

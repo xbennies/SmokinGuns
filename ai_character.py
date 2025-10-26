@@ -3,23 +3,18 @@ import math
 from weapons import PISTOL
 
 class AICharacter:
-    def __init__(self, x, y, team):
+    def __init__(self, x, y, team, texture):
         self.pos = pygame.math.Vector2(x, y)
-        self.width = 40
-        self.height = 30
+        self.width = 28
+        self.height = 28
 
         self.team = team
 
-        self.original_image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        if self.team == 'police':
-            self.original_image.fill((0, 160, 255))
-        else:
-            self.original_image.fill((255, 50, 50))
+        self.original_image = pygame.transform.scale(texture, (self.width, self.height))
 
-        pygame.draw.line(self.original_image, (255,255,255), (self.width / 2, self.height / 2), (self.width /2, 0), 3)
         self.image = self.original_image
         self.rect = self.image.get_rect(center=self.pos)
-        self.hitbox = pygame.Rect(0, 0, self.width, self.height)
+        self.hitbox = pygame.Rect(0, 0, self.width * 0.8, self.height * 0.8)
         self.hitbox.center = self.pos
         
         self.move_speed = 2.2
